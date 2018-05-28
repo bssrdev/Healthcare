@@ -1,0 +1,516 @@
+﻿<!DOCTYPE html>
+<html> 
+  <head>
+    <!-- <script src="web3.min.js"></script> -->
+    <script type="text/javasript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <meta charset="utf-8">
+    <title>Healthcare</title>
+    <style>
+      .btn {
+      border: 2px solid black;
+      background-color: white;
+      color: black;
+      padding: 8px 15px;
+      font-size: 13px;
+      cursor: pointer;
+      }
+      .success {
+      border-color: #4CAF50;
+      color: green;
+      }
+      
+      .success:hover {
+      background-color: #4CAF50;
+      color: white;
+      }
+      #t {
+        text-align:right
+      }
+      .center {
+        margin: auto;
+        width: 60%;
+        border: 3px solid #73AD21;
+        padding: 10px;
+      }
+      .tag {
+      /* position: absolute; */
+      width: 300px;
+      height: 300px;
+      z-index: 15;
+      top: 30%;
+      left: 50%;
+      margin: 50px  60px;
+      
+      }
+    </style>
+  </head>
+  <body >
+
+    <center><h1>HEALTHCARE </h1></center>
+    <br><br>
+    <center><h2>PATIENT REGISTERATION :</h2>
+    <!-- <div id="t">
+      <input type="button" class="btn success" value="Upload Data" onclick="upload()">
+    </div> -->
+    <div class="center tag">
+      <div class="form-group">
+        <label for="name">PatientName:</label>
+        <input type="text" class="form-control" style="width:300px;" id="_patient_name">
+        <br><br>
+      </div>
+
+      <div>
+        <label for="date">Birth date:</label>
+        <input type="date"  name="bday" id="_patient_birth_date">
+        <br><br>
+      </div>
+      
+      <div class="form-group">
+        <label for="place">Birth place:</label>
+        <input type="text" class="form-control" style="width:300px;" id="_place_of_birth">
+        <br><br>
+      </div>
+      
+      <div class="radio">
+        <label for="radio">Gender:</label>
+        <label><input type="radio" name="optradio" id="g1" value="1">Male</label>
+        <label><input type="radio" name="optradio" id="g2" value="0">Female</label>
+        <br>
+        <br>
+      </div>
+
+      <div>
+        <input type="button" class="btn success" value="save" onclick="push_info()">
+      </div>
+    </div>
+    <br>
+    <h2>UPLOAD PATIENT'S ADDITIONAL DATA :</h2>
+    <div class="center tag">
+      <label>Patient Id:</label>
+      <input type="text" id="patient_id_push">
+      <br>
+      <br>
+      <label>Data Hash:</label>
+      <input type="text" id="data">
+      <br>
+      <br>
+      <input type="button" class="btn success" value="Upload" onclick="push_data()">
+    </div>
+
+    <h2>PATIENT DETAILS:</h2>
+    <div class="center tag">
+      <label>Patient Id:</label>
+      <input  type="text" id="patient_id_pull">
+      <br>
+      <br>      
+      <input type="button" class="btn success" value="Show details" onclick="show_details()">
+      
+      <br>
+      <br>
+      
+      <br>
+      <label for="name">PatientName:</label>
+      <input type="text" id="_patient_name_show" readonly>
+      <br><br>
+    
+
+  
+      <label for="date">Birth date:</label>
+      <input type="text" id="_patient_birth_date_show" readonly>
+      <br><br>
+    
+    
+    
+      <label for="place">Birth place:</label>
+      <input type="text" id="_place_of_birth_show" readonly>
+      <br><br>
+    
+      <label for="radio">Gender:</label>
+      <input type="text" id="_gender_show" readonly>
+      <br><br>
+      <label>Data:</label>
+      <input type="text" id="_data_label_show" readonly>
+        
+    </div> 
+    </center>    
+    
+  </body>
+  <script>
+    if (typeof web3 !== 'undefined') {
+      web3 = new Web3(web3.currentProvider);
+    }
+    else {
+    // set the provider you want from Web3.providers
+      web3 = new Web3(new Web3.providers.HttpProvider("http://ropsten.infura.io/"));   
+      if(!web3.isConnected())
+          console.log("not connected");
+      else
+          console.log("connected");
+    }
+    web3.eth.defaultAccount = web3.eth.accounts[0];
+    var abijson= web3.eth.contract([
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "_patient_name",
+            "type": "string"
+          },
+          {
+            "name": "_patient_birth_date",
+            "type": "uint256"
+          },
+          {
+            "name": "_place_of_birth",
+            "type": "string"
+          },
+          {
+            "name": "_gender",
+            "type": "bool"
+          }
+        ],
+        "name": "get_info",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": true,
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "_patient_id",
+            "type": "uint256"
+          },
+          {
+            "name": "_ipfs_hash",
+            "type": "address"
+          }
+        ],
+        "name": "store_info",
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "payable": true,
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "name": "_contract_address",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "name": "Patient_detail_map",
+        "outputs": [
+          {
+            "name": "patient_name",
+            "type": "string"
+          },
+          {
+            "name": "patient_birth_date",
+            "type": "uint256"
+          },
+          {
+            "name": "place_of_birth",
+            "type": "string"
+          },
+          {
+            "name": "gender",
+            "type": "bool"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "patient_ids",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "name": "id",
+            "type": "uint256"
+          }
+        ],
+        "name": "show_data",
+        "outputs": [
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]);
+    var _contract_address= abijson.at('0x47479c6111c65390934075fdc158e4c0856b11e8');
+    
+    // if(!web3.isConnected()) {
+    //   console.log("Ok....web3.isConnected");
+    // } 
+    // else {
+    //   console.log("no web3 is not Connected");
+    // }
+          
+    web3.version.getNetwork((err, netId) => {
+      console.log("netId is"+ netId)        
+      switch (netId) {
+        case "1":
+          console.log('This is mainnet')
+          break
+        case "2":
+          console.log('This is the deprecated Morden test network.')
+          break
+        case "3":
+          console.log('This is the ropsten test network.')
+          break
+        case "4":
+          console.log('This is the Rinkeby test network.')
+          break
+        case "42":
+          console.log('This is the Kovan test network.')
+          break
+        default:
+          console.log('This is an unknown network.')
+      }
+    })
+
+    function push_info(){
+      console.log("inside push")
+      var a=document.getElementById("_patient_name").value;
+      var b=document.getElementById("_patient_birth_date").value;
+      // alert(b)
+      var c = parseInt(Math.round(new Date(b).getTime()/1000));
+      // alert(c)
+      var d=document.getElementById("_place_of_birth").value;
+      var f="";
+      if(document.getElementById("g1").checked)
+      {
+          f="true";
+      }
+      // alert(f)
+      // value;
+      // alert(e)
+      // var f ="";
+      // if(e==1)
+      // {
+      //   f="true";//male
+      // }
+      //(string _patient_name, uint256 _patient_birth_date, string _place_of_birth, bool _gender
+      //string _patient_name, uint256 _patient_birth_date, string _place_of_birth, bool _gender
+      _contract_address.get_info.sendTransaction(a,c,d,f,function(error,res){
+        if (!error) {
+          _contract_address.patient_ids.call(function(err,resu){
+            if (!err) {
+              alert("patient id:"+(parseInt(resu)+1))
+            }
+            else {
+              alert("error");
+            }
+          });
+          // alert(res);
+        }   
+        else {
+          alert("error");
+        }
+//////////////////////////////
+// var accountInterval = setInterval(function()
+//     {
+//       web3.eth.getTransactionReceipt(res,function(err,result){
+//         if(err != null) {
+//         reject(err);
+//         }
+
+//         if(result !== null)
+//         {
+//           clearInterval(accountInterval);
+//           // console.log("obj 1 :"+result);
+
+//           if(result.status == 0x1)
+//           {
+//             // console.log("obj "+result.status)
+//             resolve("Success");
+//             meta.router.navigate(['']);
+//             // window.location.reload();
+//           }
+//           else
+//           {
+//             // console.log("obj "+result.status)
+//             resolve("Failed");
+//             meta.router.navigate(['']);
+//             // window.location.reload();
+//           }
+//         }
+//       })
+//     },100)
+
+    /////////////////////////////
+
+      });
+    }
+
+    function push_data(){
+      var a=document.getElementById("patient_id_push").value;
+      var b=document.getElementById("data").value;
+      _contract_address.store_info(a,b,function(error,result){
+        if (!error) {
+          alert("transaction hash created !check metamask");
+        }   
+        else {
+          alert("error");
+        }
+      });
+    }
+
+    function show_details(){
+      // alert("inside show detail")
+      var a=document.getElementById("patient_id_pull").value;
+          
+      _contract_address.show_data.call(a,function(error,result){
+        if (!error) {
+          document.getElementById("_data_label_show").value = result;
+        }   
+        else {
+          alert("error");
+        }
+      });
+      _contract_address.Patient_detail_map.call(a,function(error,result){
+        if (!error) {
+          document.getElementById("_patient_name_show").value = result[0];
+          var date = new Date(result[1] * 1000).toLocaleDateString();
+          document.getElementById("_patient_birth_date_show").value = date;
+          document.getElementById("_place_of_birth_show").value = result[2];
+          if(result[3]==true)
+          {
+            document.getElementById("_gender_show").value = "male";
+          }
+          else if(result[3]==false)
+          {
+            document.getElementById("_gender_show").value = "female";
+          }
+        }   
+        else {
+          alert("error");
+        }
+      });
+    }
+
+  </script>
+</html> 
+
+
+
+
+
+    
+  <!-- //   function set()
+  //       {
+  //       document.getElementById("lbl").value='asdf1354sdf54sd6f454s';
+  //       }
+
+  // function Push_info()
+  //   {
+  //   var patientName=document.getElementById('pname').value;
+  //   var birthPlace=document.getElementById('bplace').value;
+  //   var birthDate=document.getElementById('datep').value;
+
+  //   var gen = document.getElementById('gender').value;
+  //   var rate_value;
+  //   if (document.getElementById('g1').checked) 
+  //   {
+  //     rate_value = document.getElementById('g1').value;
+  //   }
+  //   else
+  //   {
+  //     rate_value = document.getElementById('g2').value;
+  //   }
+
+  // alert(patientName);
+  // alert(birthDate);
+  // alert(birthPlace);
+  // alert(rate_value);
+  // }
+  // function upload()
+  // {
+  //   window.open("second.html")
+  // }
+    
+    // function fixspender(){
+    // 	var e=document.getElementById("spender").value;
+    // 	var f=document.getElementById("spen_amount").value;
+    // 	_contract_address.approve(e,f,function(error,result){
+      //         	if (!error) 
+    // 	{
+      //           	alert(result);
+      //             }   
+    // 	else 
+    // 	{
+      //          	alert("error");
+    // 	}
+    //     });
+    // }
+    // function spen_transfer(){
+    // 	var g=document.getElementById("spen_ad").value;
+    // 	var h=document.getElementById("rec_ad").value;	
+    // 	var i=document.getElementById("spen_transfer_amount").value;
+    // 	_contract_address.transferFrom(g,h,i,function(error,result){
+      //         	if (!error) 
+    // 	{
+      //           	alert(result);
+      //             }   
+    // 	else 
+    // 	{
+      //          	alert("error");
+    // 	}
+    //     });
+    // }
+    // function spe_bal(){
+    // 	var j=document.getElementById("spe_ad").value;
+    // 	_contract_address.allowance(j,function(error,result){
+      //         	if (!error) 
+    // 	{
+      //           	alert(result);
+      //             }   
+    // 	else 
+    // 	{
+      //          	alert("error");
+    // 	}
+    //     });
+    // } -->
+  
